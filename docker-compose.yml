@@ -1,0 +1,11 @@
+version: '3.8'
+
+# nohub uvicorn app.main:app --reload > dev/null
+
+services:
+  fastapi:
+    build:
+      context: .
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+    ports:
+      - 8080:8080
