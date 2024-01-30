@@ -2,10 +2,21 @@ version: '3.8'
 
 # nohub uvicorn app.main:app --reload > dev/null
 
+networks:
+  my_net:
+    driver: bridge
+
 services:
-  fastapi:
+  api:
+    image: "backend:0.0.1"
+    restart: always
+    container_name: fast_api
     build:
-      context: .
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+      context: ./app
+    command: uvicorn main:app --host 0.0.0.0 --port 8080 --reload
     ports:
       - 8080:8080
+    networks:
+      - default
+      - my_net
+        
