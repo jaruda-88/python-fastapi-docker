@@ -7,10 +7,30 @@ networks:
     driver: bridge
 
 services:
-  api:
-    image: "backend:0.0.1"
+  t-db:
+    image: postgres:13-alpine
     restart: always
-    container_name: fast_api
+    container_name: t-db
+    # volumes:
+    #   - ./app/databases/datas:/var/lib/postgres/data
+    environment:
+      TZ: Asia/Seoul
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    networks:
+      - default
+      - my_net
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 4s
+      timeout: 60s
+      retries: 10
+
+  t-backend:
+    image: "t-backend:0.0.1"
+    restart: always
+    container_name: t-backend
     build:
       context: ./app
     command: uvicorn main:app --host 0.0.0.0 --port 8080 --reload
@@ -19,4 +39,6 @@ services:
     networks:
       - default
       - my_net
-        
+    depends_on:
+      t-db:
+        condition: service_healthy
