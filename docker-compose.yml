@@ -15,9 +15,11 @@ services:
     #   - ./app/databases/datas:/var/lib/postgres/data
     environment:
       TZ: Asia/Seoul
-      POSTGRES_PASSWORD: admin
+      POSTGRES_PASSWORD: /run/secrets/MY-POSTGRES-PWD
     ports:
       - "5432:5432"
+    secrets:
+      - MY-POSTGRES-PWD
     networks:
       - default
       - my_net
@@ -27,16 +29,16 @@ services:
       timeout: 60s
       retries: 10
 
-  t-backend:
-    image: "t-backend:0.0.1"
+  t-api:
+    image: "ljm/fapi:0.0.1"
     restart: always
-    container_name: t-backend
+    container_name: t-api
     build:
       context: ./app
     command: uvicorn main:app --host 0.0.0.0 --port 8080 --reload
     ports:
       - 8080:8080
-    networks:
+    networks: 
       - default
       - my_net
     depends_on:
