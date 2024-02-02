@@ -1,5 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from starlette.middleware.cors import CORSMiddleware
+from databases import handler, models, functions
+from sqlalchemy.orm import Session
+
 
 def create_app():
 
@@ -13,6 +16,10 @@ def create_app():
         allow_headers=["*"],
     )
 
+    handler.db.initialise(app)
+
+    models.Base.metadata.create_all(bind=handler.db.engine)
+
     return app
 
 
@@ -24,6 +31,22 @@ async def root():
     return {"message" : "Hello World"}
 
 
-@app.get('/items/{item_id}')
-def read_item(item_id : int, q : str | None = None):
-    return {"item_id" : item_id, "q" : q}
+@app.get('/data/{data_id}', response_model=functions.Res)
+def read_item(data_id : int, session: Session = Depends(handler.db.session)):
+
+    data = session.query(models.BBS).filter(models.BBS.id == data_id).first()
+
+    return data
+
+
+@app.post('/new_data/', response_model=functions.Res)
+async def register_test(data: functions.TestCreate, session: Session = Depends(handler.db.session)):
+    data = models.BBS(**data.dict())
+
+    session.add(data)
+    session.flush()
+
+    session.commit()
+
+    return data
+

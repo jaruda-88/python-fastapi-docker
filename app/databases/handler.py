@@ -14,12 +14,8 @@ class DBHandler:
         if app is not None:
             self.initialise(app=app, **kwargs)
 
+
     def initialise(self, app: FastAPI, **kwargs):
-
-        url = ""
-
-        if not url:
-            return
         
         poolRecycle = 900
         echo = True
