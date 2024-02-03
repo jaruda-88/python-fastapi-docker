@@ -24,7 +24,7 @@ class DBHandler:
         pwd = 'admin'
         host = '192.168.0.100'
         port = 5432
-        db_name = 'tb_test'
+        db_name = 'test'
 
         self._engine = create_engine(
             f'postgresql://{username}:{pwd}@{host}:{port}/{db_name}',

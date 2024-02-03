@@ -1,27 +1,35 @@
-version: '3.8'
+version: '3.7'      # 3.9에서는 depends_on이 안된다
 
 # nohub uvicorn app.main:app --reload > dev/null
 
 networks:
   my_net:
-    driver: bridge
+    # driver: bridge
 
 services:
   t-db:
     image: postgres:13-alpine
-    restart: always
-    container_name: t-db
+    deploy:
+      replicas: 1
+      placement:                      # 노드 지정
+        constraints:
+          - node.role==manager
+        # max_replicas_per_node: 1
+      restart_policy:                 # 실패 재시작 정책 restart 최대 2번
+        condition: on-failure 
+        max_attempts: 2
+    # restart: always
     # volumes:
     #   - ./app/databases/datas:/var/lib/postgres/data
     environment:
       TZ: Asia/Seoul
-      POSTGRES_PASSWORD: /run/secrets/MY-POSTGRES-PWD
+      # POSTGRES_PASSWORD_FILE: /run/secrets/MY-POSTGRES-PWD
+      POSTGRES_PASSWORD: admin
     ports:
       - "5432:5432"
-    secrets:
-      - MY-POSTGRES-PWD
+    # secrets:
+    #   - MY-POSTGRES-PWD
     networks:
-      - default
       - my_net
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
@@ -31,16 +39,23 @@ services:
 
   t-api:
     image: "ljm/fapi:0.0.1"
-    restart: always
     container_name: t-api
+    deploy:
+      replicas: 1
+    # restart: always
     build:
       context: ./app
     command: uvicorn main:app --host 0.0.0.0 --port 8080 --reload
     ports:
       - 8080:8080
     networks: 
-      - default
       - my_net
     depends_on:
-      t-db:
-        condition: service_healthy
+      - t-db  
+      # - t-db:
+      #     condition: service_healthy
+
+
+# docker stack deploy -c docker-compose.yml {}
+# docker stack rm {}
+# docker service update --forck {}
