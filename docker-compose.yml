@@ -59,3 +59,4 @@ services:
 # docker stack deploy -c docker-compose.yml {}
 # docker stack rm {}
 # docker service update --forck {}
+# docker-compose up --build {}
