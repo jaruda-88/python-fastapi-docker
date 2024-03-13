@@ -37,7 +37,7 @@ services:
       timeout: 60s
       retries: 10
 
-  t-api:
+  t-api:  
     image: "ljm/fapi:0.0.1"
     container_name: t-api
     deploy:
